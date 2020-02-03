@@ -783,6 +783,11 @@ Printer.prototype.setReverseColors = function (bool) {
   return this;
 };
 
+Printer.prototype.getStatus = function () {
+  this.buffer.write(_.STATUS.R);
+  return this;
+};
+
 /**
  * [exports description]
  * @type {[type]}

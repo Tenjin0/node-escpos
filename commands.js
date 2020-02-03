@@ -317,6 +317,13 @@ _.SCREEN = {
 };
 
 /**
+ * [STATUS description]
+ * @type {Object}
+ */
+_.STATUS = {
+  R: _.GS + 'Z' + '\x72',
+}
+/**
  * [exports description]
  * @type {[type]}
  */

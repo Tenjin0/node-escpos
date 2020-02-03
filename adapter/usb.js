@@ -27,7 +27,6 @@ function USB(vid, pid){
   if (!usb) {
     usb = require('usb');
   }
-
   EventEmitter.call(this);
   var self = this;
   this.device = null;

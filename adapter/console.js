@@ -6,6 +6,7 @@
  * @return {[type]}      [description]
  */
 function stdout(data, bit){
+  console.log("stdout")
   bit = bit || 8;
   for(var i=0;i < data.length;i+= bit){
     var arr = [];
@@ -44,6 +45,7 @@ Console.prototype.open = function(callback){
  * @return {[type]}      [description]
  */
 Console.prototype.write = function(data){
+  console.log("write")
   this.handler && this.handler(data);
 };
 
