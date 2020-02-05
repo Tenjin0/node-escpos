@@ -27,8 +27,8 @@ Network.prototype.open = function(callback){
   //connect to net printer by socket (port,ip)
   this.device.on("error", (err) => {
     callback && callback(err, self.device);
-  }).on('data', buf => {
-    // console.log('printer say:', buf);
+  }).on('data', data => {
+    this.emit('_response', data)
   }).connect(this.port, this.address, function(err){
     self.emit('connect', self.device);
     callback && callback(err, self.device);
@@ -51,13 +51,12 @@ Network.prototype.write = function(data, callback){
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-Network.prototype.close = function(callback){
+Network.prototype.close = function(callback, data){
   if(this.device){
     this.device.destroy();
-    this.device = null;
   }
   this.emit('disconnect', this.device);
-  callback && callback(null, this.device);
+  callback && callback(null, data);
   return this;
 }
 

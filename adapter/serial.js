@@ -17,8 +17,9 @@ function Serial(port, options){
   this.device = new SerialPort(port, options);
   this.device.on('close', function() {
     self.emit('disconnect', self.device);
-    self.device = null;
   });
+
+
   EventEmitter.call(this);
   return this;
 };
@@ -31,7 +32,16 @@ util.inherits(Serial, EventEmitter);
  * @return {[type]}
  */
 Serial.prototype.open = function(callback){
-  this.device.open(callback);
+  var self = this;
+  this.device.open(function(err) {
+    self.device.on('data', function(data) {
+      if (data.length <= 2) {
+        self.emit('_response', data)
+      }
+    })
+    return callback && callback(err);
+  });
+  
   return this;
 };
 
@@ -41,7 +51,7 @@ Serial.prototype.open = function(callback){
  * @param  {Function} callback [description]
  * @return {[type]}            [description]
  */
-Serial.prototype.write = function(data, callback){
+Serial.prototype.write = function(data, callback) {
   this.device.write(data, callback);
   return this;
 };
@@ -52,19 +62,22 @@ Serial.prototype.write = function(data, callback){
  * @param  {int}      timeout   [allow manual timeout for emulated COM ports (bluetooth, ...)]
  * @return {[type]} [description]
  */
-Serial.prototype.close = function(callback, timeout) {
+Serial.prototype.close = function(callback, data, timeout) {
 
   var self = this;
 
   this.device.drain(function() {
 
     self.device.flush(function(err) {
-
+      self.device.removeAllListeners("data")
       setTimeout(function() {
+        err ? callback && callback(err, data) : self.device.close(function(err) {
 
-        err ? callback && callback(err, self.device) : self.device.close(function(err) {
-          self.device = null;
-          return callback && callback(err, self.device);
+          if (!err && data instanceof Error) {
+            err = data
+            data = null
+          }  
+          return callback && callback(err, data);
         });
 
       }, "number" === typeof timeout && 0 < timeout ? timeout : 0);

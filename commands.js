@@ -321,7 +321,9 @@ _.SCREEN = {
  * @type {Object}
  */
 _.STATUS = {
-  R: _.GS + 'Z' + '\x72',
+  P: _.DLE + '\x04' + '\x01',
+  O: _.DLE + '\x04' + '\x02',
+  PO:  _.DLE + '\x04' + '\x01' + _.DLE + '\x04' + '\x02'
 }
 /**
  * [exports description]

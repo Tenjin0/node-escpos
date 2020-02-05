@@ -52,7 +52,6 @@ function USB(vid, pid){
     if(device == self.device) {
       self.emit('detach'    , device);
       self.emit('disconnect', device);
-      self.device = null;
     }
   });
 
@@ -123,8 +122,18 @@ USB.prototype.open = function (callback){
           if(endpoint.direction == 'out' && !self.endpoint) {
             self.endpoint = endpoint;
           }
+          if(endpoint.direction == 'in' && !self.inEndpoint) {
+            self.inEndpoint = endpoint;
+            inEndpoint.startPoll(1, 8, ()=> {
+              inEndpoint.transfert(64, (err, data) => {
+                inEndpoint.on("data", (data) => {
+                  self.emit('_response', data)
+                })
+              })
+            })
+          }
         });
-        if(self.endpoint) {
+        if(self.endpoint && self.inEndpoint) {
           self.emit('connect', self.device);
           callback && callback(null, self);
         } else if(++counter === this.device.interfaces.length && !self.endpoint){
@@ -148,13 +157,13 @@ USB.prototype.write = function(data, callback){
   return this;
 };
 
-USB.prototype.close = function(callback){
+USB.prototype.close = function(callback, data){
   if(this.device) {
     this.emit('close', this.device);
     this.device.close();
     usb.removeAllListeners('detach');
   }
-  callback && callback();
+  callback && callback(null, data);
   return this;
 };
 

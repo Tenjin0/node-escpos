@@ -1,22 +1,17 @@
 'use strict';
 const escpos = require('../');
 
-const device  = new escpos.USB(0x0485, 0x7541);
+const device  = new escpos.Serial("COM2");
 
 const printer = new escpos.Printer(device);
-
+const toto = "https://www.maisonsdumonde.com.maisonsdumonde.comehttps://www.maisonsdumonde.com.maisonsdumonde.come"
 device.open(function() {
-  printer
-  .model('qsprinter')
-  .font('a')
-  .align('ct')
-  .size(1, 1)
-  .encode('utf8')
-  .text('QR code example')
-  // .qrcodeqs('http://agriex.market')
-  .qrcode('ทดสอบ')
+  printer.font("A").align("CT").size(1, 1).style("NORMAL").qrimage(toto, (data) => {
+    console.log(data)
+    printer.cut().close()
+  })
   // .barcode('123456789012', 'EAN13') // code length 12
   // .barcode('109876543210') // default type 'EAN13'
   // .barcode('7654321', 'EAN8') // The EAN parity bit is automatically added.
-  .close();
+
 });
