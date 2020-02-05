@@ -123,13 +123,11 @@ USB.prototype.open = function (callback){
             self.endpoint = endpoint;
           }
           if(endpoint.direction == 'in' && !self.inEndpoint) {
-            self.inEndpoint = endpoint;
-            inEndpoint.startPoll(1, 8, ()=> {
-              inEndpoint.transfert(64, (err, data) => {
-                inEndpoint.on("data", (data) => {
-                  self.emit('_response', data)
-                })
-              })
+
+            self.inEndpoint = endpoint
+            self.inEndpoint.startPoll(1, 8)
+            self.inEndpoint.on("data", (data) => {
+              self.emit('_response', data)
             })
           }
         });
@@ -158,10 +156,20 @@ USB.prototype.write = function(data, callback){
 };
 
 USB.prototype.close = function(callback, data){
+  // console.log(this.inEndpoint)
   if(this.device) {
     this.emit('close', this.device);
-    this.device.close();
-    usb.removeAllListeners('detach');
+    if (this.inEndpoint && this.inEndpoint.pollActive) {
+          this.inEndpoint.stopPoll(() => {
+            this.device.close();
+            usb.removeAllListeners('detach');
+
+          })
+    } else {
+      this.device.close();
+      usb.removeAllListeners('detach');
+
+    }
   }
   callback && callback(null, data);
   return this;
